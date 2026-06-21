@@ -1,6 +1,9 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using ApiProdutos.Models;
+using Microsoft.AspNetCore.Identity;
+using ApiProdutos.Data;
+using Microsoft.EntityFrameworkCore;
 
 namespace ApiProdutos.Controllers
 {
@@ -8,18 +11,25 @@ namespace ApiProdutos.Controllers
     [ApiController]
     public class ProdutoController : ControllerBase
     {
-        private static List<Produto> produtos = new List<Produto>();
+        private readonly AppDbContext _context;
+
+        public ProdutoController(AppDbContext context)
+        {
+            _context = context;
+        }
 
         [HttpGet]
-        public IActionResult Get()
+        public async Task<IActionResult> Get()
         {
+            var produtos = await _context.Produtos.ToListAsync();
             return Ok(produtos);
         }
         [HttpPost]
-        public IActionResult Post(Produto produto)
+        public async Task<IActionResult> Post(Produto produto)
         {
-            produto.Id = produtos.Count + 1;
-            produtos.Add(produto);
+            
+            _context.Produtos.Add(produto);
+            await _context.SaveChangesAsync();
             return Ok(produto);
         }
 
